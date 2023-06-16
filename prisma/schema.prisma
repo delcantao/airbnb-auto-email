@@ -1,0 +1,63 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+model Guest {
+  id               Int       @id @default(autoincrement())
+  id_internal      String    @unique @db.VarChar(200)
+  chat_text        String    @db.VarChar(8000)
+  date_text        String    @db.VarChar(8000)
+  name             String?   @db.VarChar(200)
+  document         String?   @db.VarChar(200)
+  name_partner     String?   @db.VarChar(200)
+  document_partner String?   @db.VarChar(200)
+  checkin_date     DateTime? @db.DateTime
+  checkout_date    DateTime? @db.DateTime
+  email_flat_sent  Boolean   @default(false)
+  guest_canceled   Boolean   @default(false)
+  flat_id          Int       @default(1201)
+  price            Decimal   @default(0) @db.Decimal(18, 2)
+  updatedAt        DateTime  @default(now())
+}
+
+model OpenAIUsage {
+  id               Int      @id @default(autoincrement())
+  createdAt        DateTime @default(now())
+  completionTokens BigInt
+  promptTokens     BigInt
+  totalTokens      BigInt
+}
+
+// model Post {
+//   id        Int      @id @default(autoincrement())
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+//   title     String   @db.VarChar(255)
+//   content   String?
+//   published Boolean  @default(false)
+//   author    User     @relation(fields: [authorId], references: [id])
+//   authorId  Int
+// }
+
+// model Profile {
+//   id     Int     @id @default(autoincrement())
+//   bio    String?
+//   user   User    @relation(fields: [userId], references: [id])
+//   userId Int     @unique
+// }
+
+// model User {
+//   id      Int      @id @default(autoincrement())
+//   email   String   @unique
+//   name    String?
+//   posts   Post[]
+//   profile Profile?
+// }
