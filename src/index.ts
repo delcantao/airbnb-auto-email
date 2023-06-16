@@ -1,6 +1,6 @@
 import { Guest } from "@prisma/client";
 import { ElementHandle, Page } from "puppeteer";
-import { sleep } from "./helpers";
+import { loopSendEmail, sleep } from "./helpers";
 import { extractCheckinCheckout, extractNameAndDocumentGuests } from "./openAI";
 import {
   getGuests,
@@ -69,6 +69,19 @@ const infiniteReadChats = async (page: Page) => {
             date_text: dateContent,
             id_internal: name + dates,
             name,
+            // id: 0,
+            // document: null,
+            // name_partner: null,
+            // document_partner: null,
+            // checkin_date: null,
+            // checkout_date: null,
+            // email_flat_sent: false,
+            // guest_canceled: false,
+            // flat_id: 0,
+            // price: 0.0 as any,
+            // guestUseCar: false,
+            // carLicense: null,
+            // updatedAt: new Date(),
           };
 
           await createGuest(guest);
@@ -80,6 +93,7 @@ const infiniteReadChats = async (page: Page) => {
 
       console.log("esperando 5 minutos para o proximo LOOP");
       await updateEntriesWithDateNamesAndDocuments();
+      await loopSendEmail();
       await sleep(timeToWait);
       await page.reload();
     }

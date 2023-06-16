@@ -11,11 +11,12 @@
 <body>
     <p> Olá, bom dia!! </p>
     <p> Tudo bem? </p>
-    <p> Hoje entra um novo hospede {com/sem acompanhante}: </p>
+    <p> Hoje entra um novo hospede ${com acompanhante}: </p>
 
-    <p> <b>{guest.name} - {guest.document} </b></p>
-    <p> Check in: <b> {guest.checkin} </b> </p>
-    <p> Check out: <b> {guest.checkout} </b> </p>
+    ${guest}
+
+    <p> Check in: <b> ${guest.checkin} </b> </p>
+    <p> Check out: <b> ${guest.checkout} </b> </p>
 
     <p> Ps. hospedes irão utilizar o estacionamento, mas ainda não têm a placa do carro, como será um carro de aluguel.
     </p>

@@ -60,6 +60,27 @@ async function getGuests(): Promise<Guest[]> {
     process.exit(1);
   }
 }
+async function updateGuestStatusEmail(
+  id: number,
+  success: boolean
+): Promise<boolean> {
+  try {
+    const data = {
+      email_flat_sent: success,
+    };
+    console.log(`updating guest ${id}`, data);
+    const updated = await prisma.guest.update({
+      where: { id: id },
+      data,
+    });
+    return updated?.email_flat_sent ?? false;
+  } catch (error) {
+    console.error(error);
+    await prisma.$disconnect();
+    // process.exit(1);
+  }
+  return false;
+}
 async function updateGuest(id: number, guest: Guest): Promise<Guest | null> {
   try {
     const data = {
@@ -100,10 +121,6 @@ async function updateGuest(id: number, guest: Guest): Promise<Guest | null> {
 }
 
 const updateEntriesWithDateNamesAndDocuments = async () => {
-  /*
-    foreach chat in chats 
-  */
-
   const guests = (await getGuestsToUpdate()) as Guest[];
   console.log(`guests to update: ${guests.length}`);
 
@@ -120,11 +137,11 @@ const updateEntriesWithDateNamesAndDocuments = async () => {
 
       guest.price = dates.price;
 
-      guest.name = guestData[0]?.name ?? null;
-      guest.document = guestData[0]?.document ?? null;
+      guest.name = guestData[0]?.name ?? guest.name;
+      guest.document = guestData[0]?.document ?? guest.document;
 
-      guest.name_partner = guestData[1]?.name ?? null;
-      guest.document_partner = guestData[1]?.document ?? null;
+      guest.name_partner = guestData[1]?.name ?? guest.name_partner;
+      guest.document_partner = guestData[1]?.document ?? guest.document_partner;
     } catch (error) {
       console.log("setting data", error);
     }
@@ -160,4 +177,5 @@ export {
   createOpenAIUsage,
   getGuestsToUpdate,
   updateEntriesWithDateNamesAndDocuments,
+  updateGuestStatusEmail,
 };

@@ -1,9 +1,5 @@
-import { getCpfAndNameFromChatText, getNameByCpf } from "./provider/cpf-finder";
-import {
-  getGuests,
-  updateEntriesWithDateNamesAndDocuments,
-} from "./queries-prisma/db-queries";
+import { getHtmlEmail } from "./provider/email-sender";
 
 (async () => {
-  await updateEntriesWithDateNamesAndDocuments();
+  getHtmlEmail();
 })();

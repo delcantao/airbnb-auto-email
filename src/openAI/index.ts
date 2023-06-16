@@ -12,8 +12,10 @@ const promptDocumentExtract = `Olá, ChatGPT! Tenho um arquivo de texto com info
 const promptDates = `Hello, ChatGPT! I have a text file with unstructured information from a chat containing details of hotel guests. I would like your help to extract the check-in and check-out dates from the text, as well as the price. The date does not include the year, so please assume the current year in your response. Your answer should only contain the JSON with the checkin, checkout, and price. The date format should be 'yyyy-MM-dd'. The price should be in numeric format with 2 decimal places, for example, 744.33. If any value is not found, it should be included in the JSON with null values`;
 
 const extractCheckinCheckout = async (
-  text: string
+  text?: string | undefined | null
 ): Promise<CheckinCheckout> => {
+  if (text == undefined || text == null)
+    return { checkin: null, checkout: null, price: null };
   const openAiResult = await openAiChat.generate([
     [new SystemChatMessage(promptDates), new HumanChatMessage(text)],
   ]);

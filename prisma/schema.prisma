@@ -13,8 +13,8 @@ datasource db {
 model Guest {
   id               Int       @id @default(autoincrement())
   id_internal      String    @unique @db.VarChar(200)
-  chat_text        String    @db.VarChar(8000)
-  date_text        String    @db.VarChar(8000)
+  chat_text        String?   @db.VarChar(8000)
+  date_text        String?   @db.VarChar(8000)
   name             String?   @db.VarChar(200)
   document         String?   @db.VarChar(200)
   name_partner     String?   @db.VarChar(200)
@@ -26,6 +26,8 @@ model Guest {
   flat_id          Int       @default(1201)
   price            Decimal   @default(0) @db.Decimal(18, 2)
   updatedAt        DateTime  @default(now())
+  guestUseCar      Boolean   @default(false)
+  carLicense       String?   @db.VarChar(200)
 }
 
 model OpenAIUsage {

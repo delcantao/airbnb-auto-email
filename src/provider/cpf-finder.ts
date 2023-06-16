@@ -15,8 +15,9 @@ const config = {
 };
 
 const getCpfAndNameFromChatText = async (
-  text: any
+  text: string | null | undefined
 ): Promise<GuestFromChat[]> => {
+  if (!text) return [];
   const cpfs = await getGuestsCpfByRegex(text);
   const cpfAndNames = await Promise.all(
     cpfs.map(async (cpf: string) => {
