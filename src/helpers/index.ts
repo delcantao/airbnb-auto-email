@@ -9,6 +9,17 @@ const sleep = (ms: number) => {
     setTimeout(resolve, ms);
   });
 };
+const capitalizeFirstLetters = (text: string) => {
+  const palavras = text.toLowerCase().split(" ");
+
+  for (let i = 0; i < palavras.length; i++) {
+    const palavra = palavras[i];
+    palavras[i] = palavra.charAt(0).toUpperCase() + palavra.slice(1);
+  }
+
+  return palavras.join(" ");
+};
+
 const loopSendEmail = async () => {
   const guests = await getGuests();
   const today = new Date();
@@ -34,4 +45,4 @@ const loopSendEmail = async () => {
     await sleep(1000);
   }
 };
-export { sleep, loopSendEmail };
+export { sleep, loopSendEmail, capitalizeFirstLetters };

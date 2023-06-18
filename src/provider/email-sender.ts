@@ -1,10 +1,16 @@
 import { Guest } from "@prisma/client";
+import { capitalizeFirstLetters } from "../helpers";
 import { updateGuestStatusEmail } from "../queries-prisma/db-queries";
 const path = require("path");
 const sgMail = require("@sendgrid/mail");
 const dotenv = require("dotenv");
 const fs = require("fs");
-const guestText = "<p> <b>${guest.name} - ${guest.document} </b></p>";
+const guestText = "<p> <strong>${guest.name} - ${guest.document} </strong></p>";
+const vehicleText =
+  "<p> Ps. hospedes irão utilizar o estacionamento ${guest.vehicle}</p>";
+const vehiclePlate =
+  "<p>Placa do veículo: <strong>${guest.plate}</strong> </p>";
+const noVehicleYet = `, mas ainda não têm a placa do carro, como será um carro de aluguel.`;
 // read data from a file
 dotenv.config({ override: true });
 const getRootPath = () => {
@@ -37,36 +43,42 @@ const getHtmlEmail = async () => {
   const data = await fs.readFileSync(emailPath, "utf8");
   return data;
 };
-const replaceEmailData = (body: String, guest: Guest) => {
+const replaceEmailData = (body: String, guest: Guest): String => {
   let guestReplace = [];
 
   guestReplace.push(
     guestText
-      .replace("${guest.name}", guest.name ?? "Não informado")
-      .replace("${guest.document}", guest.document ?? "Não informado")
+      .replace("${guest.name}", capitalizeFirstLetters(guest.name ?? ""))
+      .replace("${guest.document}", guest.document ?? "")
   );
+  if (guest.name_partner && guest.document_partner)
+    guestReplace.push(
+      guestText
+        .replace(
+          "${guest.name}",
+          capitalizeFirstLetters(guest.name_partner ?? "")
+        )
+        .replace("${guest.document}", guest.document_partner ?? "")
+    );
 
-  guestReplace.push(
-    guestText
-      .replace("${guest.name}", guest.name_partner ?? "Não informado")
-      .replace("${guest.document}", guest.document_partner ?? "Não informado")
-  );
-  const checkin = guest.checkin_date
-    ?.toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    })
-    .split("/")
-    .join(".");
-  const checkout = guest.checkout_date
-    ?.toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    })
-    .split("/")
-    .join(".");
+  const checkin =
+    guest.checkin_date
+      ?.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      })
+      .split("/")
+      .join(".") + " às 15h";
+  const checkout =
+    guest.checkout_date
+      ?.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      })
+      .split("/")
+      .join(".") + " às 11h";
   console.log("guestReplace", guestReplace.join(" "));
   body = body.replace("${guest}", guestReplace.join(" "));
   body = body.replace("${guest.checkin}", checkin ?? "");
@@ -75,7 +87,19 @@ const replaceEmailData = (body: String, guest: Guest) => {
     "${com acompanhante}",
     guestReplace.length > 1 ? "com acompanhante" : ""
   );
-  // {guests}
+
+  let text = "";
+
+  if (guest.guestUseCar ?? true) {
+    text = vehicleText.replace("${vehicle}", vehicleText);
+    text = text.replace(
+      "${guest.vehicle}",
+      guest.carLicense
+        ? vehiclePlate.replace("${guest.plate}", guest.carLicense.toUpperCase())
+        : noVehicleYet
+    );
+  }
+  body = body.replace("${vehicle}", text);
 
   return body;
 };
@@ -102,4 +126,4 @@ const sendEmail = async (guest: Guest) => {
   }
 };
 
-export { sendEmail, getHtmlEmail };
+export { sendEmail, getHtmlEmail, replaceEmailData };

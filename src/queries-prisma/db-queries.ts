@@ -2,6 +2,7 @@ import { Guest, OpenAIUsage, PrismaClient } from "@prisma/client";
 import {
   extractCheckinCheckout,
   extractNameAndDocumentGuests,
+  extractVehicle,
 } from "../openAI";
 import {
   getCpfAndNameFromChatText,
@@ -10,7 +11,7 @@ import {
 
 const prisma = new PrismaClient();
 
-async function createGuest(chat: Guest) {
+async function createOrUpdateGuest(chat: Guest) {
   try {
     const found = await prisma.guest.findMany({
       where: { id_internal: chat.id_internal },
@@ -19,6 +20,14 @@ async function createGuest(chat: Guest) {
     if (found.length == 0)
       await prisma.guest.create({
         data: chat,
+      });
+    else
+      await prisma.guest.update({
+        where: { id_internal: chat.id_internal },
+        data: {
+          chat_text: chat.chat_text,
+          date_text: chat.date_text,
+        },
       });
     // prisma.guest.update;
     await prisma.$disconnect();
@@ -91,7 +100,10 @@ async function updateGuest(id: number, guest: Guest): Promise<Guest | null> {
       name_partner:
         (await getNameByCpf(guest.document_partner)) ?? guest.name_partner,
       document_partner: guest.document_partner,
+      carLicense: guest.carLicense,
+      guestUseCar: guest.guestUseCar,
     };
+
     console.log(`updating guest ${id}`, data);
     return await prisma.guest.update({
       where: { id: id },
@@ -120,22 +132,27 @@ async function updateGuest(id: number, guest: Guest): Promise<Guest | null> {
   }
 }
 
-const updateEntriesWithDateNamesAndDocuments = async () => {
-  const guests = (await getGuestsToUpdate()) as Guest[];
+const updateEntriesWithDateNamesVehiclesAndDocuments = async () => {
+  const guests = (await getGuests()) as Guest[];
   console.log(`guests to update: ${guests.length}`);
 
   guests.forEach(async (guest: Guest) => {
     const dates = await extractCheckinCheckout(guest.date_text);
     const guestData = await getCpfAndNameFromChatText(guest.chat_text);
+    const vehicle = await extractVehicle(guest.chat_text);
 
-    console.log(`dates`, dates);
-    console.log(`guestData`, guestData);
+    // console.log(`dates`, dates);
+    // console.log(`guestData`, guestData);
+    console.log(`vehicle`, vehicle);
 
     try {
       guest.checkin_date = new Date(dates?.checkin ?? "1900-01-01");
       guest.checkout_date = new Date(dates?.checkout ?? "1900-01-01");
 
       guest.price = dates.price;
+
+      guest.carLicense = vehicle?.plate ?? guest.carLicense;
+      guest.guestUseCar = vehicle?.car ?? guest.guestUseCar;
 
       guest.name = guestData[0]?.name ?? guest.name;
       guest.document = guestData[0]?.document ?? guest.document;
@@ -171,11 +188,11 @@ async function createOpenAIUsage(
   }
 }
 export {
-  createGuest,
+  createOrUpdateGuest,
   getGuests,
   updateGuest,
   createOpenAIUsage,
   getGuestsToUpdate,
-  updateEntriesWithDateNamesAndDocuments,
+  updateEntriesWithDateNamesVehiclesAndDocuments,
   updateGuestStatusEmail,
 };

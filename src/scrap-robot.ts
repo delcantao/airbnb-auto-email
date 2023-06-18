@@ -4,10 +4,10 @@ import { loopSendEmail, sleep } from "./helpers";
 import { extractCheckinCheckout, extractNameAndDocumentGuests } from "./openAI";
 import {
   getGuests,
-  createGuest,
   updateGuest,
   getGuestsToUpdate,
-  updateEntriesWithDateNamesAndDocuments,
+  updateEntriesWithDateNamesVehiclesAndDocuments,
+  createOrUpdateGuest,
 } from "./queries-prisma/db-queries";
 
 const dotenv = require("dotenv");
@@ -69,6 +69,7 @@ const infiniteReadChats = async (page: Page) => {
             date_text: dateContent,
             id_internal: name + dates,
             name,
+            guestUseCar: null,
             // id: 0,
             // document: null,
             // name_partner: null,
@@ -84,7 +85,7 @@ const infiniteReadChats = async (page: Page) => {
             // updatedAt: new Date(),
           };
 
-          await createGuest(guest);
+          await createOrUpdateGuest(guest);
           console.log(`chatContent ${i} - OK`, guest.id_internal);
         } catch (error) {
           console.log(`chatContent ${i} - ERROR`, error);
@@ -92,7 +93,7 @@ const infiniteReadChats = async (page: Page) => {
       }
 
       console.log("esperando 5 minutos para o proximo LOOP");
-      await updateEntriesWithDateNamesAndDocuments();
+      await updateEntriesWithDateNamesVehiclesAndDocuments();
       await loopSendEmail();
       await sleep(timeToWait);
       await page.reload();

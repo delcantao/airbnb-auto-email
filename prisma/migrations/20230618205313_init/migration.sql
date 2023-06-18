@@ -19,7 +19,7 @@ CREATE TABLE [dbo].[Guest] (
     [flat_id] INT NOT NULL CONSTRAINT [Guest_flat_id_df] DEFAULT 1201,
     [price] DECIMAL(18,2) NOT NULL CONSTRAINT [Guest_price_df] DEFAULT 0,
     [updatedAt] DATETIME2 NOT NULL CONSTRAINT [Guest_updatedAt_df] DEFAULT CURRENT_TIMESTAMP,
-    [guestUseCar] BIT NOT NULL CONSTRAINT [Guest_guestUseCar_df] DEFAULT 0,
+    [guestUseCar] BIT CONSTRAINT [Guest_guestUseCar_df] DEFAULT 0,
     [carLicense] VARCHAR(200),
     CONSTRAINT [Guest_pkey] PRIMARY KEY CLUSTERED ([id]),
     CONSTRAINT [Guest_id_internal_key] UNIQUE NONCLUSTERED ([id_internal])

@@ -7,5 +7,8 @@ type GuestFromChat = {
   name: string;
   document: string;
 };
-
-export { CheckinCheckout, GuestFromChat };
+type Car = {
+  plate: string;
+  car: boolean;
+};
+export { CheckinCheckout, GuestFromChat, Car };
