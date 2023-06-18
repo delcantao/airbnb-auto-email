@@ -6,33 +6,33 @@ generator client {
 }
 
 datasource db {
-  provider = "mongodb"
-  url      = env("DATABASE_URL_MONGODB")
+  provider = "sqlserver"
+  url      = env("DATABASE_URL_SQLSERVER")
 }
 
 model Guest {
-  id               String    @id @default(auto()) @map("_id") @db.ObjectId
-  id_internal      String    @unique
-  chat_text        String?
-  date_text        String?
-  name             String?
-  document         String?
-  name_partner     String?
-  document_partner String?
-  checkin_date     DateTime?
-  checkout_date    DateTime?
+  id               Int       @id @default(autoincrement())
+  id_internal      String    @unique @db.VarChar(200)
+  chat_text        String?   @db.VarChar(8000)
+  date_text        String?   @db.VarChar(8000)
+  name             String?   @db.VarChar(200)
+  document         String?   @db.VarChar(200)
+  name_partner     String?   @db.VarChar(200)
+  document_partner String?   @db.VarChar(200)
+  checkin_date     DateTime? @db.DateTime
+  checkout_date    DateTime? @db.DateTime
   email_flat_sent  Boolean   @default(false)
   guest_canceled   Boolean   @default(false)
   flat_id          Int       @default(1201)
-  price            Float
-  updatedAt        DateTime //@default(now())
+  price            Decimal   @default(0) @db.Decimal(18, 2)
+  updatedAt        DateTime  @default(now())
   guestUseCar      Boolean?  @default(false)
-  carLicense       String?
+  carLicense       String?   @db.VarChar(200)
 }
 
 model OpenAIUsage {
-  id               String   @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt        DateTime // @default(now())
+  id               Int      @id @default(autoincrement())
+  createdAt        DateTime @default(now())
   completionTokens BigInt
   promptTokens     BigInt
   totalTokens      BigInt
