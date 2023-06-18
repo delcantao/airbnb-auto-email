@@ -70,7 +70,7 @@ async function getGuests(): Promise<Guest[]> {
   }
 }
 async function updateGuestStatusEmail(
-  id: number,
+  id: string,
   success: boolean
 ): Promise<boolean> {
   try {
@@ -90,7 +90,7 @@ async function updateGuestStatusEmail(
   }
   return false;
 }
-async function updateGuest(id: number, guest: Guest): Promise<Guest | null> {
+async function updateGuest(id: string, guest: Guest): Promise<Guest | null> {
   try {
     const data = {
       checkin_date: guest.checkin_date,
@@ -109,23 +109,6 @@ async function updateGuest(id: number, guest: Guest): Promise<Guest | null> {
       where: { id: id },
       data,
     });
-
-    //     model Guest {
-    //   id               Int       @id @default(autoincrement())
-    //   chat_text        String    @db.VarChar(8000)
-    //   date_text        String    @db.VarChar(8000)
-    //   name             String?   @db.VarChar(200)
-    //   document         String?   @db.VarChar(200)
-    //   name_partner     String?   @db.VarChar(200)
-    //   document_partner String?   @db.VarChar(200)
-    //   checkin_date     DateTime? @db.DateTime
-    //   checkout_date    DateTime? @db.DateTime
-    //   email_flat_sent  Boolean   @default(false)
-    //   guest_canceled   Boolean   @default(false)
-    //   flat_id          Int       @default(1201)
-    //   price            Decimal   @default(0) @db.Decimal(18, 2)
-    //   updatedAt        DateTime  @default(now())
-    // }
   } catch (prisma) {
     console.log("error when trying to update Guest to prisma:", prisma);
     return null;
@@ -133,7 +116,7 @@ async function updateGuest(id: number, guest: Guest): Promise<Guest | null> {
 }
 
 const updateEntriesWithDateNamesVehiclesAndDocuments = async () => {
-  const guests = (await getGuests()) as Guest[];
+  const guests = (await getGuestsToUpdate()) as Guest[];
   console.log(`guests to update: ${guests.length}`);
 
   guests.forEach(async (guest: Guest) => {

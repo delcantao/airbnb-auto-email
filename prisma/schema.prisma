@@ -24,15 +24,15 @@ model Guest {
   email_flat_sent  Boolean   @default(false)
   guest_canceled   Boolean   @default(false)
   flat_id          Int       @default(1201)
-  price            Float
-  updatedAt        DateTime //@default(now())
+  price            Float?
+  updatedAt        DateTime  @default(now())
   guestUseCar      Boolean?  @default(false)
   carLicense       String?
 }
 
 model OpenAIUsage {
   id               String   @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt        DateTime // @default(now())
+  createdAt        DateTime @default(now())
   completionTokens BigInt
   promptTokens     BigInt
   totalTokens      BigInt
