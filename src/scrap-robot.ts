@@ -104,7 +104,7 @@ const infiniteReadChats = async (page: Page) => {
 puppeteer.use(StealthPlugin());
 (async () => {
   const browser = await puppeteer.launch({
-    executablePath: executablePath,
+    // executablePath: executablePath,
     headless: false,
     args: ["--no-sandbox"],
   });
