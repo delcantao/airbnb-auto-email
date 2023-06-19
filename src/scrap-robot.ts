@@ -105,7 +105,7 @@ puppeteer.use(StealthPlugin());
 (async () => {
   const browser = await puppeteer.launch({
     // executablePath: executablePath,
-    headless: false,
+    headless: true,
     args: ["--no-sandbox"],
   });
 
