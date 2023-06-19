@@ -117,7 +117,7 @@ puppeteer.use(StealthPlugin());
 
   await page.goto("https://pt.airbnb.com/login");
 
-  await page.waitForNetworkIdle();
+  await page.waitForSelector("button[aria-label='Continuar com email']");
 
   await page.click('button[aria-label="Continuar com email"]');
 
