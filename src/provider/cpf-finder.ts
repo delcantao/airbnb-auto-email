@@ -19,6 +19,10 @@ const getCpfAndNameFromChatText = async (
 ): Promise<GuestFromChat[]> => {
   if (!text) return [];
   const cpfs = await getGuestsCpfByRegex(text);
+  console.log("cpfs", cpfs);
+  console.log("text", text);
+  if (cpfs == null) return [];
+
   const cpfAndNames = await Promise.all(
     cpfs.map(async (cpf: string) => {
       const name = await getNameByCpf(cpf);

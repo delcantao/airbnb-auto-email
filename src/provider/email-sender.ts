@@ -112,9 +112,11 @@ const sendEmail = async (guest: Guest) => {
       to: process.env.SENDGRID_EMAIL_TO, // Change to your recipient
       from: process.env.SENDGRID_EMAIL_FROM, // Change to your verified sender
       subject: "Flat 1201 - Novo Hóspede",
+      cc: process.env.SENDGRID_EMAIL_CC,
       // text: "and easy to do anywhere, even with Node.js",
       html: body,
     };
+    
     const result = await sgMail.send(msg);
     const status = result[0]?.statusCode === 202;
     const updated = await updateGuestStatusEmail(guest.id, status);

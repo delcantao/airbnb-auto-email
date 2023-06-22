@@ -9,7 +9,9 @@ const openAiChat = new ChatOpenAI({
 });
 const promptDocumentExtract = `Olá, ChatGPT! Tenho um arquivo de texto com informações desestruturadas de um chat contendo detalhes dos hóspedes de um hotel. Gostaria de sua ajuda para extrair os nomes e CPFs dos hóspedes mencionados no texto. O seu retorno deve ser apenas um JSON Array contendo o document e o name. Caso não encontre, retorne um array vazio.`;
 const promptVehicle = `NO texto abaixo o anfitrião pergunta se o hospede utilizará carro. É possível saber, pela resposta do hospede, se o hospede utilizará carro? Sem inferir respostas. Retorne um JSON contendo car: true para tem carro, false para não tem carro, null para indeterminado, plate: contendo a placa do carro.`;
-const promptDates = `Hello, ChatGPT! I have a text file with unstructured information from a chat containing details of hotel guests. I would like your help to extract the check-in and check-out dates from the text, as well as the price. The date does not include the year, so please assume the current year in your response. Your answer should only contain the JSON with the checkin, checkout, and price. The date format should be 'yyyy-MM-dd'. The price should be in numeric format with 2 decimal places, for example, 744.33. If any value is not found, it should be included in the JSON with null values`;
+const promptDates = `Hello, ChatGPT! I have a text file with unstructured information from a chat containing details of hotel guests. I would like your help to extract the check-in and check-out dates from the text, as well as the price. The date does not include the year, so please assume the year of ${
+  new Date().getFullYear
+} in your response. Your answer should only contain the JSON with the checkin, checkout, and price. The date format should be 'yyyy-MM-dd'.  The price should be in numeric format with 2 decimal places, for example, 744.33. If any value is not found, it should be included in the JSON with null values`;
 
 const extractCheckinCheckout = async (
   text?: string | undefined | null

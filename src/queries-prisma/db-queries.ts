@@ -39,15 +39,31 @@ async function createOrUpdateGuest(chat: Guest) {
 }
 async function getGuestsToUpdate(): Promise<Guest[]> {
   try {
+    const startDate = new Date("1900-01-01");
     const chats = await prisma.guest.findMany({
       where: {
         OR: [
           { document: null },
-          { document: "" },
-          { checkout_date: null },
-          { checkin_date: null },
+          //   // { document: "" },
+          //   // { checkout_date: null },
+          { checkin_date: { equals: null } },
+          { checkin_date: { equals: undefined } },
+          { checkin_date: { equals: startDate } },
+          { checkout_date: { equals: null } },
+          { checkout_date: { equals: undefined } },
+          { checkout_date: { equals: startDate } },
         ],
-        AND: [{ chat_text: { not: "" } }, { guest_canceled: false }],
+        AND: [
+          { chat_text: { not: "" } },
+          { chat_text: { not: null } },
+          // { checkout_date: null },
+          { guest_canceled: false },
+
+          { document: undefined },
+          { checkout_date: undefined },
+          { checkin_date: undefined },
+          { name: { not: "Atendimento ao Cliente do Airbnb" } },
+        ],
       },
     });
     await prisma.$disconnect();

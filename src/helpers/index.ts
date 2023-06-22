@@ -33,6 +33,7 @@ const loopSendEmail = async () => {
       e.checkin_date != null &&
       e.checkin_date?.toDateString() === today.toDateString()
   );
+  console.log("guestToEmail", guestToEmail);
   for (let i = 0; i < guestToEmail.length; i++) {
     const guest = guests[i];
     console.log("guest", guest);

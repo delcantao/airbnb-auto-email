@@ -1,4 +1,4 @@
-import { Guest } from "@prisma/client";
+import { exit } from "process";
 import { ElementHandle, Page } from "puppeteer";
 import { loopSendEmail, sleep } from "./helpers";
 import { extractCheckinCheckout, extractNameAndDocumentGuests } from "./openAI";
@@ -15,7 +15,7 @@ const fs = require("fs");
 const sql = require("mssql");
 const puppeteer = require("puppeteer-extra");
 const StealthPlugin = require("puppeteer-extra-plugin-stealth");
-
+const shouldScrap = false;
 dotenv.config({ override: true });
 
 const userAgent =
@@ -25,73 +25,94 @@ const executablePath = process.env.CHROME_PATH;
 const user = process.env.USER_AIRBNB;
 const pass = process.env.PASS_AIRBNB;
 const timeToWait = 1000 * 60 * 5;
-
+const waitForMessageList = async (page: Page) => {
+  let loop = true;
+  while (loop) {
+    try {
+      const result = await page.waitForSelector(
+        'div[data-testid="message-list"]',
+        { timeout: 10000 }
+      );
+      loop = false;
+    } catch (error) {
+      console.log("esperando +10 segundos para tentar novamente");
+      // await page.reload();
+      await sleep(5000);
+    }
+  }
+};
 const infiniteReadChats = async (page: Page) => {
   try {
     while (true) {
-      await sleep(5000);
-      let name = "";
-      let dates = "";
-      const chats: ElementHandle<HTMLAnchorElement>[] = await page.$$(
-        "#inbox-scroll-content a"
-      );
+      if (shouldScrap) {
+        await sleep(5000);
+        let name = "";
+        let dates = "";
+        const chats: ElementHandle<HTMLAnchorElement>[] = await page.$$(
+          "#inbox-scroll-content a"
+        );
 
-      console.log("chats", chats);
-      for (let i = 0; i < chats.length; i++) {
-        try {
-          await chats[i].click();
-          await sleep(5000);
+        console.log("chats", chats);
+        for (let i = 0; i < chats.length; i++) {
+          try {
+            await chats[i].click();
+            await sleep(8500);
+            // await waitForMessageList(page);
 
-          name = await chats[i].evaluate(
-            (el: any) =>
-              el.children[1]?.children[1]?.children[0]?.children[0]?.textContent
-          );
-          dates = await chats[i].evaluate((el: any) =>
-            el.children[1].children[3].children[0].textContent
-              .split("·")[0]
-              .trim()
-          );
+            name = await chats[i].evaluate(
+              (el: any) =>
+                el.children[1]?.children[1]?.children[0]?.children[0]
+                  ?.textContent
+            );
+            dates = await chats[i].evaluate(
+              (el: any) =>
+                el.children[1]?.children[3]?.children[0]?.children[0]
+                  ?.textContent
+              // .split("·")[0]
+              // .trim()
+            );
 
-          const chatContent = await page.evaluate(() => {
-            const elemento = document.querySelectorAll(
-              'div[data-testid="message-list"]'
-            )[0];
-            return elemento ? elemento.textContent : null;
-          });
-          const dateContent = await page.evaluate(() => {
-            const elemento = document.querySelectorAll(
-              'div[data-section-id="HEADER"'
-            )[0];
-            return elemento ? elemento.textContent : null;
-          });
-          const guest: any = {
-            chat_text: chatContent,
-            date_text: dateContent,
-            id_internal: name + dates,
-            name,
-            guestUseCar: null,
-            // id: 0,
-            // document: null,
-            // name_partner: null,
-            // document_partner: null,
-            // checkin_date: null,
-            // checkout_date: null,
-            // email_flat_sent: false,
-            // guest_canceled: false,
-            // flat_id: 0,
-            // price: 0.0 as any,
-            // guestUseCar: false,
-            // carLicense: null,
-            // updatedAt: new Date(),
-          };
+            const chatContent = await page.evaluate(() => {
+              const elemento = document.querySelectorAll(
+                'div[data-testid="message-list"]'
+              )[0];
+              return elemento ? elemento.textContent : null;
+            });
+            // const dateContent = await page.evaluate(() => {
+            //   const elemento = document.querySelectorAll(
+            //     'div[data-section-id="HEADER"'
+            //   )[0];
+            //   return elemento ? elemento.textContent : null;
+            // });
 
-          await createOrUpdateGuest(guest);
-          console.log(`chatContent ${i} - OK`, guest.id_internal);
-        } catch (error) {
-          console.log(`chatContent ${i} - ERROR`, error);
+            const guest: any = {
+              chat_text: chatContent,
+              date_text: dates,
+              id_internal: name + dates,
+              name,
+              guestUseCar: null,
+              // id: 0,
+              // document: null,
+              // name_partner: null,
+              // document_partner: null,
+              // checkin_date: null,
+              // checkout_date: null,
+              // email_flat_sent: false,
+              // guest_canceled: false,
+              // flat_id: 0,
+              // price: 0.0 as any,
+              // guestUseCar: false,
+              // carLicense: null,
+              // updatedAt: new Date(),
+            };
+
+            await createOrUpdateGuest(guest);
+            console.log(`chatContent ${i} - OK`, guest.id_internal);
+          } catch (error) {
+            console.log(`chatContent ${i} - ERROR`, error);
+          }
         }
       }
-
       console.log("esperando 5 minutos para o proximo LOOP");
       await updateEntriesWithDateNamesVehiclesAndDocuments();
       await loopSendEmail();
@@ -104,14 +125,19 @@ const infiniteReadChats = async (page: Page) => {
 puppeteer.use(StealthPlugin());
 (async () => {
   const browser = await puppeteer.launch({
-    // executablePath: executablePath,
-    headless: true,
+    executablePath: executablePath,
+    headless: false,
     args: ["--no-sandbox"],
   });
 
-  const page = await browser.newPage();
+  if (user === undefined || pass === undefined) {
+    console.log("user or pass is undefined");
+    exit(1);
+  }
 
-  await page.setDefaultNavigationTimeout(0);
+  const page: Page = await browser.newPage();
+
+  page.setDefaultNavigationTimeout(0);
 
   await page.setUserAgent(userAgent);
 
@@ -121,13 +147,15 @@ puppeteer.use(StealthPlugin());
 
   await page.click('button[aria-label="Continuar com email"]');
 
-  await page.type("input[name='user[email]'", user);
+  await page.type("input[name='user[email]'", user!);
 
   await page.click('button[data-veloute="submit-btn-cypress"]');
 
-  await sleep(1000);
+  await page.waitForSelector("input[name='user[password]'");
 
-  await page.type("input[name='user[password]'", pass);
+  await page.type("input[name='user[password]'", pass!);
+
+  await sleep(2000);
 
   await page.click("button[data-veloute='submit-btn-cypress'");
 
