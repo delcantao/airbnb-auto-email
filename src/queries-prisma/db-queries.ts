@@ -16,7 +16,9 @@ async function updateRunStatus() {
   const result = await prisma.lastUpdate.findFirst({
     where: {
       release: pkg.version,
-      machineName: `${process.env.OS}_${process.env.USERDOMAIN}`,
+      machineName: `${process.env.OS ?? process.env.WSL_DISTRO_NAME}_${
+        process.env.USERDOMAIN ?? process.env.NAME
+      }`,
     },
   });
 
@@ -30,7 +32,9 @@ async function updateRunStatus() {
   await prisma.lastUpdate.create({
     data: {
       release: pkg.version,
-      machineName: `${process.env.OS}_${process.env.USERDOMAIN}` ?? "",
+      machineName: `${process.env.OS ?? process.env.WSL_DISTRO_NAME}_${
+        process.env.USERDOMAIN ?? process.env.NAME
+      }`,
       updatedAt: new Date(),
     },
   });

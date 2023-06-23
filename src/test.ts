@@ -19,7 +19,10 @@ import { loopSendEmail } from "./helpers";
 
   await updateRunStatus();
 
-  console.log({ release: pkg.version, machineName: process.env.USERDOMAIN });
+  console.log({
+    release: pkg.version,
+    machineName: process.env.USERDOMAIN ?? process.env.NAME,
+  });
   // await loopSendEmail();
   // guestToLoop.forEach(async (guest) => {
 
