@@ -8,6 +8,7 @@ import {
   getGuestsToUpdate,
   updateEntriesWithDateNamesVehiclesAndDocuments,
   createOrUpdateGuest,
+  updateRunStatus,
 } from "./queries-prisma/db-queries";
 
 const dotenv = require("dotenv");
@@ -15,7 +16,7 @@ const fs = require("fs");
 const sql = require("mssql");
 const puppeteer = require("puppeteer-extra");
 const StealthPlugin = require("puppeteer-extra-plugin-stealth");
-const shouldScrap = false;
+const shouldScrap = true;
 dotenv.config({ override: true });
 
 const userAgent =
@@ -44,6 +45,7 @@ const waitForMessageList = async (page: Page) => {
 const infiniteReadChats = async (page: Page) => {
   try {
     while (true) {
+      await updateRunStatus();
       if (shouldScrap) {
         await sleep(5000);
         let name = "";
@@ -125,8 +127,8 @@ const infiniteReadChats = async (page: Page) => {
 puppeteer.use(StealthPlugin());
 (async () => {
   const browser = await puppeteer.launch({
-    executablePath: executablePath,
-    headless: false,
+    // executablePath: executablePath,
+    headless: true,
     args: ["--no-sandbox"],
   });
 
