@@ -1,3 +1,4 @@
+const pkg = require("../../package.json");
 import { Guest, OpenAIUsage, PrismaClient } from "@prisma/client";
 import {
   extractCheckinCheckout,
@@ -11,6 +12,29 @@ import {
 
 const prisma = new PrismaClient();
 
+async function updateRunStatus() {
+  const result = await prisma.lastUpdate.findFirst({
+    where: {
+      release: pkg.version,
+      machineName: `${process.env.OS}_${process.env.USERDOMAIN}`,
+    },
+  });
+
+  if (result) {
+    await prisma.lastUpdate.update({
+      where: { id: result.id },
+      data: { updatedAt: new Date() },
+    });
+    return;
+  }
+  await prisma.lastUpdate.create({
+    data: {
+      release: pkg.version,
+      machineName: `${process.env.OS}_${process.env.USERDOMAIN}` ?? "",
+      updatedAt: new Date(),
+    },
+  });
+}
 async function createOrUpdateGuest(chat: Guest) {
   try {
     const found = await prisma.guest.findMany({
@@ -194,4 +218,5 @@ export {
   getGuestsToUpdate,
   updateEntriesWithDateNamesVehiclesAndDocuments,
   updateGuestStatusEmail,
+  updateRunStatus,
 };

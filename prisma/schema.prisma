@@ -38,6 +38,13 @@ model OpenAIUsage {
   totalTokens      BigInt
 }
 
+model LastUpdate {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  release     String
+  machineName String
+  updatedAt   DateTime @default(now())
+}
+
 // model Post {
 //   id        Int      @id @default(autoincrement())
 //   createdAt DateTime @default(now())
