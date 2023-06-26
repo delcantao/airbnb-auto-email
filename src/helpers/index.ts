@@ -33,17 +33,13 @@ const loopSendEmail = async () => {
       e.checkin_date != null &&
       e.checkin_date?.toDateString() === today.toDateString()
   );
-  console.log("guestToEmail", guestToEmail);
-  for (let i = 0; i < guestToEmail.length; i++) {
-    const guest = guests[i];
-    console.log("guest", guest);
-    if (guest.email_flat_sent) {
-      console.log("guest.email_flat_sent", guest.email_flat_sent);
-      continue;
-    }
+
+  guestToEmail.forEach(async (guest) => {
+    if (guest.email_flat_sent) return;
+    console.log("email will be sent", guest.name);
     const success = await sendEmail(guest);
     await updateGuestStatusEmail(guest.id, success);
     await sleep(1000);
-  }
+  });
 };
 export { sleep, loopSendEmail, capitalizeFirstLetters };

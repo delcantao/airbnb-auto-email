@@ -121,7 +121,9 @@ const infiniteReadChats = async (page: Page) => {
       await sleep(timeToWait);
       await page.reload();
     }
-  } catch (error) {}
+  } catch (error) {
+    console.error("infiniteReadChats", error);
+  }
 };
 
 puppeteer.use(StealthPlugin());
