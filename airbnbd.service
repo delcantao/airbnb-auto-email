@@ -1,0 +1,11 @@
+[Unit]
+Description=Airbnb auto e-mail
+After=network.target
+
+[Service]
+Restart=always
+WorkingDirectory= /home/delcantao/storage/node.js/airbnb-auto-email
+ExecStart=/usr/bin/npm run dev
+
+[Install]
+WantedBy=multi-user.target
