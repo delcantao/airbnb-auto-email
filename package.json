@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "ts-node src/scrap-robot.ts",
-    "tes": "ts-node src/test.ts"
+    "dev": "npm -v && node -v && ts-node src/scrap-robot.ts",
+    "tes": "npm i && ts-node src/test.ts"
   },
   "keywords": [],
   "author": "",
