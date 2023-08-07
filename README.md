@@ -4,7 +4,7 @@
 
 This code enables the automation of sending confirmation emails for the flat we rent through the Airbnb platform. It identifies the next guest, collects some information, and sends the release email.
 
-## Tecnologias utilizadas
+## Technologies Used
 
 1. Node.js (18.16.0) com nvm
 
