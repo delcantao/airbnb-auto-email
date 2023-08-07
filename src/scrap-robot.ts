@@ -49,6 +49,7 @@ const infiniteReadChats = async (page: Page) => {
       if (shouldScrap) {
         await sleep(5000);
         let name = "";
+        let confirmed = "";
         let dates = "";
         const chats: ElementHandle<HTMLAnchorElement>[] = await page.$$(
           "#inbox-scroll-content a"
@@ -72,6 +73,10 @@ const infiniteReadChats = async (page: Page) => {
                   ?.textContent
               // .split("·")[0]
               // .trim()
+            );
+            confirmed = await chats[i].evaluate(
+              (el: any) =>
+                el.children[1].children[0].children[0].children[0].textContent
             );
 
             const chatContent = await page.evaluate(() => {
@@ -107,9 +112,13 @@ const infiniteReadChats = async (page: Page) => {
               // carLicense: null,
               // updatedAt: new Date(),
             };
+            console.log(
+              `chatContent ${i} - ` + confirmed + " - ",
+              guest.id_internal
+            );
 
-            await createOrUpdateGuest(guest);
-            console.log(`chatContent ${i} - OK`, guest.id_internal);
+            if (confirmed.toLowerCase() == "confirmada")
+              await createOrUpdateGuest(guest);
           } catch (error) {
             console.log(`chatContent ${i} - ERROR`, error);
           }
