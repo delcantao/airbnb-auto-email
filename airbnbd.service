@@ -3,9 +3,11 @@ Description=Airbnb auto e-mail
 After=network.target
 
 [Service]
+Environment="PATH=/root/.nvm/versions/node/v18.16.0/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+User=root
 Restart=always
-WorkingDirectory= /home/delcantao/storage/node.js/airbnb-auto-email
-ExecStart=/usr/bin/npm run dev
+WorkingDirectory=/path/to/files/airbnb
+ExecStart=/root/.nvm/versions/node/v18.16.0/bin/npm run dev
 
 [Install]
 WantedBy=multi-user.target
