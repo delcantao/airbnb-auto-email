@@ -7,21 +7,38 @@ This code enables the automation of sending confirmation emails for the flat we 
 ## Tecnologias utilizadas
 
 1. Node.js (18.16.0) com nvm
-   Used as the programming language for building the project
+
+   Used as the programming language for building the project.
+
 2. MongoDB
+
    Our primary database, using the free version due to the limited number of guests in our single Airbnb flat.
+
 3. Prisma
+   
    The ORM used to facilitate integration with the MongoDB database.
+   
 4. MSSQL Server
+   
    Used to query CPFs from a private provider.
+   
 5. Open AI API
+    
    To extract dates, cars, names, and documents. I chose to use OpenAI to avoid manual work, but I plan to remove this feature in the future.
+   
 6. Sendgrid
+    
    For sending emails.
 
-In the repository, I have also included a systemd service configuration file, should you wish to implement this on a Linux server. Please note that Airbnb blocks Digital Ocean server IPs for scraping. The application runs on a local Ubuntu 22.04 server at my home.
+## To Implement as a Service
 
-## To Implement the Service
+In the repository, I have also included a systemd service configuration file, should you wish to implement this on a Linux server. 
+
+Please be aware that Airbnb blocks IP addresses from Digital Ocean servers to prevent scraping. 
+
+It's also worth noting that Airbnb may block other cloud server providers as well. 
+
+The application in question is running on a local Ubuntu 22.04 server at my home, thus avoiding these restrictions
 
 - Save the `airbnbd.service` file to `/etc/systemd/system/airbnbd.service`.
 - Replace the path `/path/to/files/airbnb` with the path where the repository files are located.
