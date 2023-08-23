@@ -68,34 +68,48 @@ async function createOrUpdateGuest(chat: Guest) {
 async function getGuestsToUpdate(): Promise<Guest[]> {
   try {
     const startDate = new Date("1900-01-01");
-    const chats = await prisma.guest.findMany({
-      where: {
-        OR: [
-          { document: null },
-          //   // { document: "" },
-          //   // { checkout_date: null },
-          { checkin_date: { equals: null } },
-          { checkin_date: { equals: undefined } },
-          { checkin_date: { equals: startDate } },
-          { checkout_date: { equals: null } },
-          { checkout_date: { equals: undefined } },
-          { checkout_date: { equals: startDate } },
-        ],
-        AND: [
-          { chat_text: { not: "" } },
-          { chat_text: { not: null } },
-          // { checkout_date: null },
-          { guest_canceled: false },
+    const chats = await prisma.guest.findMany();
 
-          { document: undefined },
-          { checkout_date: undefined },
-          { checkin_date: undefined },
-          { name: { not: "Atendimento ao Cliente do Airbnb" } },
-        ],
-      },
+    const filteredGuests = chats.filter(guest => {
+      const checkin_date = guest.checkin_date;
+      const checkout_date = guest.checkout_date;
+      const chat_text = guest.chat_text;
+      const document = guest.document;
+      const name = guest.name;
+      return  (checkin_date === null  || checkin_date  === new Date('1900-01-01') ||
+              checkout_date === null || checkout_date === new Date('1900-01-01') ||
+              document == null) && 
+              (chat_text != null && chat_text != "")  &&
+              (name != "Atendimento ao Cliente do Airbnb");
     });
+    // const chats = await prisma.guest.findMany({
+    //   where: {
+    //     OR: [
+    //       { document: null },
+    //       //   // { document: "" },
+    //       //   // { checkout_date: null },
+    //       { checkin_date: { equals: null } },
+    //       { checkin_date: { equals: undefined } },
+    //       { checkin_date: { equals: startDate } },
+    //       { checkout_date: { equals: null } },
+    //       { checkout_date: { equals: undefined } },
+    //       { checkout_date: { equals: startDate } },
+    //     ],
+    //     AND: [
+    //       { chat_text: { not: "" } },
+    //       { chat_text: { not: null } },
+    //       // { checkout_date: null },
+    //       { guest_canceled: false },
+
+    //       { document: undefined },
+    //       { checkout_date: undefined },
+    //       { checkin_date: undefined },
+    //       { name: { not: "Atendimento ao Cliente do Airbnb" } },
+    //     ],
+    //   },
+    // });
     await prisma.$disconnect();
-    return chats;
+    return filteredGuests;
   } catch (error) {
     console.error(error);
     await prisma.$disconnect();
@@ -121,7 +135,7 @@ async function updateGuestStatusEmail(
     const data = {
       email_flat_sent: success,
     };
-    console.log(`updating guest ${id}`, data);
+    // console.log(`updating guest ${id}`, data);
     const updated = await prisma.guest.update({
       where: { id: id },
       data,
@@ -147,8 +161,8 @@ async function updateGuest(id: string, guest: Guest): Promise<Guest | null> {
       carLicense: guest.carLicense,
       guestUseCar: guest.guestUseCar,
     };
+    console.log(id)
 
-    console.log(`updating guest ${id}`, data);
     return await prisma.guest.update({
       where: { id: id },
       data,
@@ -164,19 +178,19 @@ const updateEntriesWithDateNamesVehiclesAndDocuments = async () => {
   console.log(`guests to update: ${guests.length}`);
 
   guests.forEach(async (guest: Guest) => {
-    const dates = await extractCheckinCheckout(guest.date_text);
+    const dates = guest.checkin_date?.toISOString() == "1900-01-01T00:00:00.000Z" ? await extractCheckinCheckout(guest.date_text) : { checkin: null, checkout: null};
     const guestData = await getCpfAndNameFromChatText(guest.chat_text);
-    const vehicle = await extractVehicle(guest.chat_text);
+    const vehicle = (guest.carLicense != null) ? { plate: null, car: null} : await extractVehicle(guest.chat_text);
 
-    // console.log(`dates`, dates);
+    console.log(`dates`, dates, guest.checkin_date, guest.checkin_date?.toISOString() == "1900-01-01T00:00:00.000Z");
     // console.log(`guestData`, guestData);
-    console.log(`vehicle`, vehicle);
+    // console.log(`vehicle`, vehicle);
 
     try {
-      guest.checkin_date = new Date(dates?.checkin ?? "1900-01-01");
-      guest.checkout_date = new Date(dates?.checkout ?? "1900-01-01");
+      guest.checkin_date =  guest.checkin_date?.toISOString() == "1900-01-01T00:00:00.000Z" ? new Date(dates.checkin ?? "1900-01-01")  : guest.checkin_date;
+      guest.checkout_date = guest.checkout_date?.toISOString() == "1900-01-01T00:00:00.000Z" ? new Date(dates.checkout ?? "1900-01-01") : guest.checkout_date;
 
-      guest.price = dates.price;
+      // guest.price = dates.price;
 
       guest.carLicense = vehicle?.plate ?? guest.carLicense;
       guest.guestUseCar = vehicle?.car ?? guest.guestUseCar;
@@ -189,7 +203,16 @@ const updateEntriesWithDateNamesVehiclesAndDocuments = async () => {
     } catch (error) {
       console.log("setting data", error);
     }
-    await updateGuest(guest.id, guest);
+    // console.log('::::::::::updating::::::::::', guest.checkin_date == new Date("1900-01-01T00:00:00.000Z"), )
+    // console.log(dates)
+    const resultUpdate = await updateGuest(guest.id, guest);
+    // const deletedRecord = await prisma.guest.delete({
+    //   where: {
+    //     id: guest.id, // Replace with the ID of the record you want to delete
+    //   },
+    // });
+
+    console.log({ _id: `ObjectId(${guest.id})` })
   });
 };
 

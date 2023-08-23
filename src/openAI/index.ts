@@ -9,9 +9,7 @@ const openAiChat = new ChatOpenAI({
 });
 const promptDocumentExtract = `Olá, ChatGPT! Tenho um arquivo de texto com informações desestruturadas de um chat contendo detalhes dos hóspedes de um hotel. Gostaria de sua ajuda para extrair os nomes e CPFs dos hóspedes mencionados no texto. O seu retorno deve ser apenas um JSON Array contendo o document e o name. Caso não encontre, retorne um array vazio.`;
 const promptVehicle = `NO texto abaixo o anfitrião pergunta se o hospede utilizará carro. É possível saber, pela resposta do hospede, se o hospede utilizará carro? Sem inferir respostas. Retorne um JSON contendo car: true para tem carro, false para não tem carro, null para indeterminado, plate: contendo a placa do carro.`;
-const promptDates = `Hello, ChatGPT! I have a text file with unstructured information from a chat containing details of hotel guests. I would like your help to extract the check-in and check-out dates from the text, as well as the price. The date does not include the year, so please assume the year of ${
-  new Date().getFullYear
-} in your response. Your answer should only contain the JSON with the checkin, checkout, and price. The date format should be 'yyyy-MM-dd'.  The price should be in numeric format with 2 decimal places, for example, 744.33. If any value is not found, it should be included in the JSON with null values`;
+const promptDates = `O texto que provisionei contem a data de checkin e checkout. Sem o ano. Estamos no mês ${new Date().getMonth()} do ano de ${ new Date().getFullYear() }. Formate-a em yyyy-MM-dd assumindo o ano que seja mais provavel. Ou seja, em um exemplo em que estamos em no mês 12 de 2023 e o checkin é para as datas '22 – 26 de jan.' o ano deve ser 2024 e não 2023 - nunca deve ir para o passado! Se não conseguir determinar, assuma o ano ${new Date().getFullYear()} Sua resposta deve conter apenas o JSON com os campos checkin, checkout. `;
 
 const extractCheckinCheckout = async (
   text?: string | undefined | null
@@ -23,6 +21,7 @@ const extractCheckinCheckout = async (
   ]);
 
   await saveUsage(openAiResult);
+  // console.log('result - datas', openAiResult)
   const dates = (await getJson(openAiResult)) as CheckinCheckout;
 
   return dates;
@@ -65,7 +64,7 @@ const getJson = (
   let result = "";
   try {
     result = openAiResult?.generations[0][0].text;
-    console.log("result", result);
+    console.log("result-json", result);
     return extractJson(result);
   } catch (error) {
     console.log("error parsing", error, result);

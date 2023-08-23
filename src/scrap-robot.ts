@@ -25,7 +25,7 @@ const userAgent =
 const executablePath = process.env.CHROME_PATH;
 const user = process.env.USER_AIRBNB;
 const pass = process.env.PASS_AIRBNB;
-const timeToWait = 1000 * 60 * 5;
+const timeToWait = 1000 * 60 * 120;
 const waitForMessageList = async (page: Page) => {
   let loop = true;
   while (loop) {
@@ -55,7 +55,7 @@ const infiniteReadChats = async (page: Page) => {
           "#inbox-scroll-content a"
         );
 
-        console.log("chats", chats);
+        // console.log("chats", chats);
         for (let i = 0; i < chats.length; i++) {
           try {
             await chats[i].click();
@@ -112,19 +112,21 @@ const infiniteReadChats = async (page: Page) => {
               // carLicense: null,
               // updatedAt: new Date(),
             };
-            console.log(
-              `chatContent ${i} - ` + confirmed + " - ",
-              guest.id_internal
-            );
+            if (confirmed.toLowerCase() == "confirmada" || confirmed.toLowerCase() == "estadia em andamento")
+            {
+              console.log(
+                `chatContent ${i} - ` + confirmed + " - ",
+                guest.id_internal
+              );
 
-            if (confirmed.toLowerCase() == "confirmada")
-              await createOrUpdateGuest(guest);
+              await createOrUpdateGuest(guest); 
+            }
           } catch (error) {
             console.log(`chatContent ${i} - ERROR`, error);
           }
         }
       }
-      console.log("esperando 5 minutos para o proximo LOOP");
+      console.log("esperando 120 minutos para o proximo LOOP");
       await updateEntriesWithDateNamesVehiclesAndDocuments();
       await loopSendEmail();
       await sleep(timeToWait);

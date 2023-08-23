@@ -19,8 +19,8 @@ const getCpfAndNameFromChatText = async (
 ): Promise<GuestFromChat[]> => {
   if (!text) return [];
   const cpfs = await getGuestsCpfByRegex(text);
-  console.log("cpfs", cpfs);
-  console.log("text", text);
+  // console.log("cpfs", cpfs);
+  // console.log("text", text);
   if (cpfs == null) return [];
 
   const cpfAndNames = await Promise.all(
@@ -55,7 +55,7 @@ const getNameByCpf = async (cpf: string | null): Promise<string | null> => {
 
     await mssql.connect(config);
     const sql = `SELECT Dc_Nome FROM tb_Cpf WHERE Cd_Cpf = ${cpf}`;
-    console.log(sql);
+    // console.log(sql);
     const result = await mssql.query(sql);
 
     name = result.recordset[0]?.Dc_Nome;

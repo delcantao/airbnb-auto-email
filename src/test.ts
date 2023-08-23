@@ -8,16 +8,21 @@ import {
   updateEntriesWithDateNamesVehiclesAndDocuments,
   updateRunStatus,
 } from "./queries-prisma/db-queries";
+
 import fs from "fs";
 import { extractCheckinCheckout, extractVehicle } from "./openAI";
 import { loopSendEmail } from "./helpers";
 
 (async () => {
   // await updateEntriesWithDateNamesVehiclesAndDocuments();
-  // const g = await getGuestsToUpdate();
-  // console.log(g);
-
-  await loopSendEmail();
+  
+  await updateEntriesWithDateNamesVehiclesAndDocuments()
+  // console.log('result as json', result.length);
+  // result.forEach(async (guest) => {
+  //   const r = await extractCheckinCheckout(guest.date_text)
+  //   console.log(guest.date_text, r);
+  // });
+  // await loopSendEmail();
 
   // console.log({ release: pkg.version, machineName: process.env });
   // await loopSendEmail();
